@@ -61,4 +61,13 @@ Result pctl_get_daily_limit_minutes(u32 *minutes);
 Result pctl_reset_play_time(void);
 Result pctl_load_timezone(void);
 
+/* Custom time tracking (for retail machines where system pctl timer doesn't work) */
+void pctl_custom_timer_start(u32 limit_minutes);
+void pctl_custom_timer_stop(void);
+void pctl_custom_timer_update(void);
+u64  pctl_custom_timer_get_played_ns(void);
+u64  pctl_custom_timer_get_limit_ns(void);
+void pctl_custom_timer_reset(void);
+void pctl_custom_timer_set_limit(u32 limit_minutes);
+
 #endif /* PCTL_HANDLER_H */

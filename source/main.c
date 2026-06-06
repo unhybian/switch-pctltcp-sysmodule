@@ -323,6 +323,12 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (R_SUCCEEDED(rc)) {
+        pctl_custom_timer_set_limit(0);  /* 初始化自定义计时器，无限制 */
+        pctl_custom_timer_reset();
+        log_msg("Custom timer initialized.");
+    }
+
     log_msg("pctltcp-sysmodule initialization complete.");
 
     /* ---- Main loop ----

@@ -37,6 +37,77 @@ static bool s_initialized = false;
 static TimeZoneRule s_tz_rule;
 static bool s_tz_rule_loaded = false;
 
+/* Custom time tracking (used when system pctl timer is not running on retail) */
+static u64 g_custom_played_ns = 0;
+static u64 g_custom_limit_ns = 0;
+static bool g_custom_timer_running = false;
+static u64 g_custom_timer_start_ns = 0;
+
+void pctl_custom_timer_start(u32 limit_minutes);
+void pctl_custom_timer_stop(void);
+void pctl_custom_timer_update(void);
+u64 pctl_custom_timer_get_played_ns(void);
+u64 pctl_custom_timer_get_limit_ns(void);
+void pctl_custom_timer_reset(void);
+void pctl_custom_timer_set_limit(u32 limit_minutes);
+
+void pctl_custom_timer_start(u32 limit_minutes)
+{
+    g_custom_limit_ns = MINUTES_TO_NS(limit_minutes);
+    g_custom_timer_start_ns = 0;
+    g_custom_timer_running = true;
+    pctl_custom_timer_update();
+}
+
+void pctl_custom_timer_stop(void)
+{
+    g_custom_timer_running = false;
+}
+
+void pctl_custom_timer_update(void)
+{
+    if (!g_custom_timer_running) return;
+
+    u64 now_ns = 0;
+    Result rc = timeGetCurrentTime(TimeType_NetworkSystemClock, &now_ns);
+    if (R_FAILED(rc)) {
+        rc = timeGetCurrentTime(TimeType_LocalSystemClock, &now_ns);
+    }
+    if (R_FAILED(rc)) return;
+
+    if (g_custom_timer_start_ns == 0) {
+        g_custom_timer_start_ns = now_ns;
+    }
+
+    if (now_ns > g_custom_timer_start_ns) {
+        g_custom_played_ns = now_ns - g_custom_timer_start_ns;
+    }
+}
+
+u64 pctl_custom_timer_get_played_ns(void)
+{
+    if (g_custom_timer_running) {
+        pctl_custom_timer_update();
+    }
+    return g_custom_played_ns;
+}
+
+u64 pctl_custom_timer_get_limit_ns(void)
+{
+    return g_custom_limit_ns;
+}
+
+void pctl_custom_timer_reset(void)
+{
+    g_custom_played_ns = 0;
+    g_custom_timer_start_ns = 0;
+}
+
+void pctl_custom_timer_set_limit(u32 limit_minutes)
+{
+    g_custom_limit_ns = MINUTES_TO_NS(limit_minutes);
+}
+
 /* ------------------------------------------------------------------ */
 /* pctl_init: Use libnx pctlInitialize() for proper service setup      */
 /* ------------------------------------------------------------------ */
