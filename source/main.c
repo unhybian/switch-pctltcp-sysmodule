@@ -369,6 +369,9 @@ int main(int argc, char **argv) {
         timeGetCurrentTime(TimeType_UserSystemClock, &t_after);
         loop++;
 
+        /* Update custom play timer (runs once per second) */
+        pctl_custom_timer_update();
+
         if (loop > 5 && g_net_up && (t_after - t_before) > 5) {
             char msg[256];
             snprintf(msg, sizeof(msg),
