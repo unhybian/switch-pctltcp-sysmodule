@@ -64,31 +64,14 @@ void pctl_custom_timer_stop(void)
     g_custom_timer_running = false;
 }
 
-void pctl_custom_timer_update(void)
+void pctl_custom_timer_tick(void)
 {
     if (!g_custom_timer_running) return;
-
-    u64 now_ns = 0;
-    Result rc = timeGetCurrentTime(TimeType_NetworkSystemClock, &now_ns);
-    if (R_FAILED(rc)) {
-        rc = timeGetCurrentTime(TimeType_LocalSystemClock, &now_ns);
-    }
-    if (R_FAILED(rc)) return;
-
-    if (g_custom_timer_start_ns == 0) {
-        g_custom_timer_start_ns = now_ns;
-    }
-
-    if (now_ns > g_custom_timer_start_ns) {
-        g_custom_played_ns = now_ns - g_custom_timer_start_ns;
-    }
+    g_custom_played_ns += 1000000000ULL;  /* +1 second per main loop iteration */
 }
 
 u64 pctl_custom_timer_get_played_ns(void)
 {
-    if (g_custom_timer_running) {
-        pctl_custom_timer_update();
-    }
     return g_custom_played_ns;
 }
 

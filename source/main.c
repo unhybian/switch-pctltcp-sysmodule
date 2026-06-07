@@ -370,7 +370,7 @@ int main(int argc, char **argv) {
         loop++;
 
         /* Update custom play timer (runs once per second) */
-        pctl_custom_timer_update();
+        pctl_custom_timer_tick();
 
         if (loop > 5 && g_net_up && (t_after - t_before) > 5) {
             char msg[256];

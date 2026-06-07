@@ -518,3 +518,12 @@ bool http_server_is_running(void)
 {
     return s_running;
 }
+
+void http_server_restart(void)
+{
+    log_msg("HTTP server restarting...");
+    http_server_stop();
+    svcSleepThread(500000000ULL);  /* 0.5s */
+    http_server_start();
+    log_msg("HTTP server restart done.");
+}
